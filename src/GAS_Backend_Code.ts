@@ -62,12 +62,29 @@ function saveClaim(claimData) {
 }
 
 function sendWhatsAppAlert(claim) {
-  const phone1 = "5491122334455"; // Configurable
-  const msg = `📢 Nuevo Reclamo: ${claim.expediente} de ${claim.denuncianteNombre} contra ${claim.empresaDenunciada}`;
-  const url = `https://api.callmebot.com/whatsapp.php?phone=${phone1}&text=${encodeURIComponent(msg)}&apikey=YOUR_API_KEY`;
+  // Número configurado por el usuario
+  const phoneNumber = "3834465044"; 
+  
+  const priorityEmoji = claim.prioridad === 'Urgente' ? '🔴' : claim.prioridad === 'Alta' ? '🟠' : '🟡';
+  
+  const msg = `📢 *NUEVO RECLAMO*\n\n` +
+              `📌 Expediente: #${claim.expediente}\n` +
+              `👤 Denunciante: ${claim.denuncianteNombre}\n` +
+              `🏢 Empresa: ${claim.empresaDenunciada}\n` +
+              `⚠️ Prioridad: ${priorityEmoji} ${claim.prioridad || 'Media'}\n` +
+              `💬 Motivo: ${claim.motivo}`;
+
+  // Se recomienda usar un servicio como CallMeBot para envíos automáticos sin intervención humana
+  // Para usarlo, debes obtener tu API Key en https://www.callmebot.com/
+  const apiKey = "YOUR_CALLMEBOT_API_KEY"; // REEMPLAZAR CON TU API KEY
+  const url = `https://api.callmebot.com/whatsapp.php?phone=${phoneNumber}&text=${encodeURIComponent(msg)}&apikey=${apiKey}`;
   
   try {
-    UrlFetchApp.fetch(url);
+    if (apiKey !== "YOUR_CALLMEBOT_API_KEY") {
+      UrlFetchApp.fetch(url);
+    } else {
+      Logger.log("WhatsApp no enviado: Falta configurar API Key de CallMeBot");
+    }
   } catch(e) {
     Logger.log("Error enviando WhatsApp: " + e.toString());
   }

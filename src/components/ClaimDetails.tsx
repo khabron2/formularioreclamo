@@ -14,11 +14,13 @@ import {
   MessageSquare,
   Building2,
   AlertCircle,
-  FileText
+  FileText,
+  MessageCircle
 } from 'lucide-react';
 import { Claim, ClaimStatus } from '../types';
 import { cn } from '../lib/utils';
 import { claimsService } from '../services/claimsService';
+import { whatsappService } from '../services/whatsappService';
 import ReportPrint from './ReportPrint';
 
 interface ClaimDetailsProps {
@@ -77,9 +79,15 @@ export default function ClaimDetails({ claim, onBack }: ClaimDetailsProps) {
         <div className="flex items-center gap-2">
           <button 
             onClick={handlePrint}
-            className="btn btn-primary flex items-center gap-2 shadow-md shadow-primary/20"
+            className="btn btn-outline flex items-center gap-2"
           >
-            <Printer size={16} /> Imprimir Informe
+            <Printer size={16} /> Imprimir
+          </button>
+          <button 
+            onClick={() => whatsappService.sendNewClaimAlert(claim)}
+            className="btn btn-primary flex items-center gap-2 bg-[#25D366] border-[#25D366] hover:bg-[#128C7E] hover:border-[#128C7E] shadow-md shadow-green-500/20"
+          >
+            <MessageCircle size={16} /> WhatsApp
           </button>
           <button 
              onClick={handleDelete}

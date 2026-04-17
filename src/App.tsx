@@ -171,11 +171,20 @@ export default function App() {
                       <label className="block text-sm font-semibold text-slate-700 mb-2">Números de WhatsApp para Alertas (uno por línea)</label>
                       <textarea 
                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                        placeholder="+5491122334455"
-                        defaultValue="+5491122334455"
+                        placeholder="3834465044"
+                        defaultValue="3834465044"
+                        id="whatsapp-config"
                       />
+                      <p className="mt-2 text-xs text-slate-400 italic">Ejemplo: 3834465044 (sin espacios ni símbolos)</p>
                     </div>
-                    <button className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition">
+                    <button 
+                      onClick={() => {
+                        const val = (document.getElementById('whatsapp-config') as HTMLTextAreaElement).value;
+                        localStorage.setItem('whatsapp_notification_numbers', val);
+                        alert('Configuración guardada correctamente.');
+                      }}
+                      className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition"
+                    >
                       Guardar Cambios
                     </button>
                   </div>
