@@ -67,7 +67,7 @@ export default function App() {
   return (
     <div className="flex h-screen bg-bg-main text-text-main font-sans overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-[240px] bg-sidebar-bg text-white flex flex-col shrink-0">
+      <aside className="w-[240px] bg-sidebar-bg text-white flex flex-col shrink-0 no-print">
         <div className="p-6">
           <div className="flex items-center gap-3 mb-8 border-b border-white/10 pb-6">
             <h1 className="text-white font-bold text-lg uppercase tracking-wider">Defensa AR</h1>
@@ -117,9 +117,9 @@ export default function App() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <main className="flex-1 flex flex-col overflow-hidden min-w-0 print:overflow-visible">
         {/* Header */}
-        <header className="h-16 bg-white border-b border-border-subtle flex items-center justify-between px-8 shrink-0">
+        <header className="h-16 bg-white border-b border-border-subtle flex items-center justify-between px-8 shrink-0 no-print">
           <div className="flex items-center gap-4">
             <input 
               type="text" 

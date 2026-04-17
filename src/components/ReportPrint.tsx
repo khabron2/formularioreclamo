@@ -64,31 +64,20 @@ const ReportPrint = forwardRef<HTMLDivElement, ReportPrintProps>(({ claim }, ref
           </div>
         )}
 
-        {/* Photos in report */}
+        {/* Documentation Links (Text Only) */}
         {claim.fotos.length > 0 && (
-          <div className="break-inside-avoid">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 border-b border-slate-100 pb-2">V. DOCUMENTACIÓN ADJUNTA</h2>
-            <div className="grid grid-cols-2 gap-4">
-              {claim.fotos.slice(0, 4).map((foto, i) => {
-                if (!foto) return null;
-                return (
-                  <div key={i} className="border border-slate-300 p-1 rounded">
-                    <img 
-                      src={foto} 
-                      alt="" 
-                      className="w-full h-40 object-contain bg-slate-50" 
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                    />
-                  </div>
-                );
-              })}
+          <div className="border border-slate-200 p-6 rounded bg-slate-50/50">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 border-b border-slate-100 pb-2">V. DOCUMENTACIÓN ADJUNTA (ENLACES)</h2>
+            <div className="space-y-2">
+              {claim.fotos.map((foto, i) => (
+                <div key={i} className="text-xs">
+                  <span className="font-bold">Documento {i + 1}:</span>{" "}
+                  <a href={foto} target="_blank" rel="noreferrer" className="text-blue-600 underline">
+                    {foto}
+                  </a>
+                </div>
+              ))}
             </div>
-            {claim.fotos.length > 4 && (
-              <p className="text-[10px] italic mt-2 text-right">Se han adjuntado {claim.fotos.length} imágenes adicionales.</p>
-            )}
           </div>
         )}
       </div>

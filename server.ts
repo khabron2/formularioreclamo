@@ -17,42 +17,23 @@ async function startServer() {
   // API Proxy for Google Apps Script to bypass CORS
   app.get("/api/claims", async (req, res) => {
     try {
-      console.log(`Proxying request to GAS: ${GAS_WEB_APP_URL}?action=getClaims`);
+      console.log(`[GET] Proxying to GAS: ${GAS_WEB_APP_URL}`);
       const response = await fetch(`${GAS_WEB_APP_URL}?action=getClaims`);
       
-      console.log(`GAS Response Status: ${response.status}`);
-      
       const contentType = response.headers.get("content-type") || "";
-      console.log(`GAS Content-Type: ${contentType}`);
-
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error(`GAS Error Body: ${errText.substring(0, 200)}`);
-        return res.status(response.status).json({ error: `Google respondió con error ${response.status}`, detail: errText.substring(0, 100) });
-      }
-
       if (contentType.includes("text/html")) {
         const text = await response.text();
-        console.error("GAS returned HTML instead of JSON.");
-        if (text.includes("Service-Login") || text.includes("reauth")) {
-           return res.status(403).json({ error: "Permisos insuficientes: La Web App debe estar publicada para 'Cualquier persona' (Anyone)." });
+        if (text.includes("Service-Login")) {
+           return res.status(403).json({ error: "Permisos: Configure la Web App como 'Anyone'." });
         }
-        return res.status(500).json({ error: "El servidor de Google devolvió una página en lugar de datos JSON." });
       }
 
       const rawData = await response.json();
-      console.log("GAS Data Structure Check:", Array.isArray(rawData) ? `Array with ${rawData.length} items` : typeof rawData);
-      
-      // Handle cases where data might be wrapped
-      let finalData = rawData;
-      if (!Array.isArray(rawData) && rawData && typeof rawData === 'object') {
-        finalData = rawData.data || rawData.records || rawData.items || rawData;
-      }
-
+      let finalData = Array.isArray(rawData) ? rawData : (rawData.data || rawData.records || []);
       res.json(finalData);
     } catch (error: any) {
-      console.error("GAS Proxy GET Error Detail:", error);
-      res.status(500).json({ error: "Error de conexión con el backend de Google.", message: error.message });
+      console.error("[GET ERROR] GAS Proxy:", error.message);
+      res.status(500).json({ error: "Error de conexión con Google.", message: error.message });
     }
   });
 

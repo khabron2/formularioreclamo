@@ -51,25 +51,33 @@
   }
 }
 
-/* Printing styles */
+/* Standard Print Rules */
 @media print {
-  body * {
-    visibility: hidden;
+  /* Hide the entire web application UI */
+  #root > :not(.print-only), 
+  aside, 
+  header, 
+  main > :not(.print-only),
+  .no-print {
+    display: none !important;
   }
-  .print-only, .print-only * {
-    visibility: visible;
-  }
-  .print-only {
-    position: absolute;
-    left: 0;
-    top: 0;
+
+  /* Reset layout for the printer */
+  body, html, #root {
     width: 100% !important;
-    padding: 0 !important;
+    height: auto !important;
     margin: 0 !important;
-    background: white !important;
-  }
-  .print-container {
     padding: 0 !important;
+    overflow: visible !important;
     background: white !important;
+    visibility: visible !important;
+  }
+
+  .print-only {
+    display: block !important;
+    visibility: visible !important;
+    position: static !important;
+    width: 100% !important;
+    height: auto !important;
   }
 }

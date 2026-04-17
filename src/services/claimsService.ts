@@ -4,18 +4,22 @@ import { format, subMonths, startOfMonth } from 'date-fns';
 const GAS_WEB_APP_URL = '/api/claims';
 
 const transformDriveUrl = (url: string): string => {
-  if (!url) return "";
+  if (!url || typeof url !== 'string') return "";
+  
+  // Clean URL (remove spaces, etc)
+  const cleanUrl = url.trim();
+  
   // Handle Google Drive links from forms
   // Common formats: 
   // 1. https://drive.google.com/open?id=FILE_ID
   // 2. https://drive.google.com/file/d/FILE_ID/view?usp=drivesdk
-  const driveIdMatch = url.match(/(?:id=|d\/|file\/d\/)([\w-]{25,})/);
+  const driveIdMatch = cleanUrl.match(/(?:id=|d\/|file\/d\/)([\w-]{25,})/);
   if (driveIdMatch && driveIdMatch[1]) {
     const fileId = driveIdMatch[1];
     // This is a direct download link pattern for images in Drive
     return `https://drive.google.com/uc?export=view&id=${fileId}`;
   }
-  return url;
+  return cleanUrl;
 };
 
 const STORAGE_KEY = 'defensa_consumidor_claims';
@@ -32,8 +36,14 @@ let cachedClaims: Claim[] = [];
 export const claimsService = {
   fetchFromGAS: async () => {
     try {
-      console.log("Fetching claims from GAS proxy...");
-      const response = await fetch(GAS_WEB_APP_URL);
+      console.log(`Fetching claims from proxy: ${window.location.origin}${GAS_WEB_APP_URL}`);
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache'
+        }
+      });
       
       let responseData;
       try {
@@ -70,10 +80,26 @@ export const claimsService = {
           prioridad: item.prioridad || item.Prioridad || "Media",
           observaciones: item.observaciones || item.Observaciones || "",
           fotos: [
-            item["1) Insertar fotos de  (factura, ticket, presupuesto, etc)"],
-            item["2) Insertar fotos de  (factura, ticket, presupuesto, etc)"],
-            item["3) Insertar fotos de  (factura, ticket, presupuesto, etc)"]
-          ].filter(Boolean).map(url => transformDriveUrl(url))
+             ...Object.keys(item)
+               .filter(key => {
+                 const k = key.toLowerCase();
+                 return k.includes('insertar') || k.includes('foto') || k.includes('imagen') || k.includes('adjunto');
+               })
+               .flatMap(key => {
+                 const val = item[key];
+                 if (typeof val === 'string') {
+                   // Split by commas or spaces if there are multiple links in one column
+                   return val.split(/[,\s]+/).map(s => s.trim()).filter(Boolean);
+                 }
+                 return Array.isArray(val) ? val : [val];
+               }),
+             item["1) Insertar fotos de  (factura, ticket, presupuesto, etc)"],
+             item["2) Insertar fotos de  (factura, ticket, presupuesto, etc)"],
+             item["3) Insertar fotos de  (factura, ticket, presupuesto, etc)"]
+          ].filter(Boolean)
+           .map(url => typeof url === 'string' ? url : String(url))
+           .filter((val, index, self) => val && self.indexOf(val) === index) // Remove duplicates
+           .map(url => transformDriveUrl(url))
         }));
         
         cachedClaims = mappedData;

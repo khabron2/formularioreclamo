@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useState } from 'react';
 import { 
   ArrowLeft, 
   Printer, 
@@ -16,7 +16,6 @@ import {
   AlertCircle,
   FileText
 } from 'lucide-react';
-import { useReactToPrint } from 'react-to-print';
 import { Claim, ClaimStatus } from '../types';
 import { cn } from '../lib/utils';
 import { claimsService } from '../services/claimsService';
@@ -28,14 +27,16 @@ interface ClaimDetailsProps {
 }
 
 export default function ClaimDetails({ claim, onBack }: ClaimDetailsProps) {
-  const printRef = useRef<HTMLDivElement>(null);
+  const [isPrinting, setIsPrinting] = useState(false);
 
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: `Informe_${claim.expediente}`,
-    bodyClass: 'print-container',
-    suppressErrors: true,
-  });
+  const handlePrint = () => {
+    setIsPrinting(true);
+    // Give state time to render the print component if it was unmounted
+    setTimeout(() => {
+      window.print();
+      setIsPrinting(false);
+    }, 250);
+  };
 
   const handleDelete = () => {
     if (confirm('¿Está seguro de eliminar este reclamo? Esta acción no se puede deshacer.')) {
@@ -61,12 +62,12 @@ export default function ClaimDetails({ claim, onBack }: ClaimDetailsProps) {
 
   return (
     <div className="space-y-6">
-      {/* Off-screen print template (using absolute instead of hidden to avoid getBoundingClientRect errors) */}
-      <div className="print-only" style={{ position: 'absolute', top: '-9999px', left: '-9999px' }}>
-        <ReportPrint ref={printRef} claim={claim} />
+      {/* Container for the manual print method */}
+      <div className="hidden print:block print-only print:static print:w-full">
+        <ReportPrint claim={claim} />
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between no-print">
         <button 
           onClick={onBack}
           className="flex items-center gap-2 text-slate-500 hover:text-slate-800 transition font-medium"
