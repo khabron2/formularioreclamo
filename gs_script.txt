@@ -1,0 +1,95 @@
+// Configuración: Nombre de la hoja donde se guardarán los datos (Respuestas de formulario 1)
+var SHEET_NAME = "Respuestas de formulario 1";
+
+/**
+ * Función que recibe las peticiones de lectura (GET)
+ */
+function doGet(e) {
+  try {
+    return obtenerReclamos();
+  } catch (error) {
+    return mensajeDeError(error.toString());
+  }
+}
+
+/**
+ * Función que recibe las peticiones de guardado/actualización (POST)
+ */
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    return guardarOActualizarReclamo(data);
+  } catch (error) {
+    return mensajeDeError(error.toString());
+  }
+}
+
+/**
+ * Lee todos los reclamos de la hoja de cálculo
+ */
+function obtenerReclamos() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(SHEET_NAME);
+  
+  if (!sheet) {
+     return mensajeDeError("No se encontró la hoja: " + SHEET_NAME);
+  }
+  
+  var range = sheet.getDataRange();
+  var values = range.getValues();
+  var headers = values[0];
+  var jsonResponse = [];
+  
+  for (var i = 1; i < values.length; i++) {
+    var row = values[i];
+    var record = {};
+    headers.forEach(function(header, index) {
+      // Usamos el nombre exacto de la columna como llave
+      record[header] = row[index];
+    });
+    jsonResponse.push(record);
+  }
+  
+  return responderJSON(jsonResponse);
+}
+
+/**
+ * Guarda un nuevo reclamo siguiendo el formato de la hoja de respuestas
+ */
+function guardarOActualizarReclamo(claim) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(SHEET_NAME);
+  
+  if (!sheet) {
+     return mensajeDeError("No se encontró la hoja: " + SHEET_NAME);
+  }
+  
+  // Mapeo inverso: De la App a las columnas del Sheet
+  var rowData = [
+    new Date(), // Marca temporal
+    claim.motivo || "", // MOTIVO DE DENUNCIA
+    claim.detalle || "", // DESCRIBA BREVEMENTE EL MOTIVO
+    claim.denuncianteNombre || "", // NOMBRE Y APELLIDO
+    claim.denuncianteTelefono || "", // TELÉFONO DE CONTACTO
+    claim.denuncianteEmail || "", // CORREO ELECTRÓNICO
+    claim.empresaDenunciada || "", // NOMBRE DEL COMERCIO
+    claim.denuncianteDireccion || "", // DIRECCIÓN EXACTA...
+    "", // LOCALIDAD
+    claim.fotos && claim.fotos[0] ? claim.fotos[0] : "", // Foto 1
+    claim.fotos && claim.fotos[1] ? claim.fotos[1] : "", // Foto 2
+    claim.fotos && claim.fotos[2] ? claim.fotos[2] : ""  // Foto 3
+  ];
+  
+  sheet.appendRow(rowData);
+  
+  return responderJSON({ status: "success" });
+}
+
+function responderJSON(objeto) {
+  return ContentService.createTextOutput(JSON.stringify(objeto))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function mensajeDeError(mensaje) {
+  return responderJSON({ status: "error", message: mensaje, debugSheet: SHEET_NAME });
+}

@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  
+  --color-primary: #004a99;
+  --color-primary-light: #e6f0fa;
+  --color-sidebar-bg: #1e293b;
+  --color-bg-main: #f8fafc;
+  --color-text-main: #334155;
+  --color-text-muted: #64748b;
+  --color-border-subtle: #e2e8f0;
+  
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  
+  --radius-xl: 12px;
+  
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+@layer base {
+  body {
+    @apply bg-bg-main text-text-main antialiased;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-md text-[0.85rem] font-semibold transition-all cursor-pointer;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary/90;
+  }
+  
+  .btn-outline {
+    @apply bg-transparent border border-border-subtle text-text-main hover:bg-slate-50;
+  }
+
+  .stat-card {
+    @apply bg-white p-5 rounded-xl border border-border-subtle shadow-sm;
+  }
+
+  .stat-label {
+    @apply text-[0.75rem] text-text-muted uppercase tracking-[0.5px] mb-2 block;
+  }
+
+  .stat-value {
+    @apply text-2xl font-bold text-primary;
+  }
+}
+
+/* Printing styles */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-only, .print-only * {
+    visibility: visible;
+  }
+  .print-only {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: white !important;
+  }
+  .print-container {
+    padding: 0 !important;
+    background: white !important;
+  }
+}
